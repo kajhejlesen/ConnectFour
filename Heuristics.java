@@ -79,7 +79,70 @@ public class Heuristics {
 		}		
 		return v;
 	}
-	
+
+
+    public static int alphaBeta(Minimax state, int depth) {
+        boolean[] legalMoves = state.getLegalMoves();
+        double a = Double.NEGATIVE_INFINITY;
+        double b = Double.POSITIVE_INFINITY;
+        double v = Double.NEGATIVE_INFINITY;
+        int maxMove = -1;
+
+        for (int i = 0; i < legalMoves.length; i++) {
+            if (legalMoves[i]) {
+                double moveValue = minValueAB(state.result(i, state.getPlayerID()), depth - 1, a, b);
+                System.out.print(moveValue + " ");
+                if (moveValue > v) {
+                    v = moveValue;
+                    maxMove = i;
+                }
+                a = a>v ? a:v;
+            }
+        }
+        System.out.println();
+        return maxMove;
+    }
+
+    private static double maxValueAB(Minimax state, int depth, double a, double b) {
+        if (!state.gameFinished().equals(IGameLogic.Winner.NOT_FINISHED))
+            return state.utility();
+
+        boolean[] legalMoves = state.getLegalMoves();
+
+        double v = Double.NEGATIVE_INFINITY;
+
+        for (int i = 0; i < legalMoves.length; i++) {
+            if (legalMoves[i]) {
+                double moveValue = minValueAB(state.result(i, state.getPlayerID()), depth-1, a, b);
+                if (moveValue > v)
+                    v = moveValue;
+                if (v >= b) return v;
+                a = a>v ? a:v;
+            }
+        }
+        return v;
+    }
+
+    private static double minValueAB(Minimax state, int depth, double a, double b) {
+        if (!state.gameFinished().equals(IGameLogic.Winner.NOT_FINISHED))
+            return state.utility();
+
+        boolean[] legalMoves = state.getLegalMoves();
+
+        double v = Double.POSITIVE_INFINITY;
+        int opponent = state.getPlayerID() == 1 ? 2 : 1;
+
+        for (int i = 0; i < legalMoves.length; i++) {
+            if (legalMoves[i]) {
+                double moveValue = maxValueAB(state.result(i, opponent), depth-1, a, b);
+                if (moveValue < v)
+                    v = moveValue;
+                if (v <= a) return v;
+                b = b<v ? b:v;
+            }
+        }
+        return v;
+    }
 
 	
 }

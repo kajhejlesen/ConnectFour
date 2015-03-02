@@ -37,7 +37,7 @@ public class Minimax implements IGameLogic {
 	}
 	
 	public Winner gameFinished() {
-        int r = Won(lastX, lastY, lastPlayer);
+        int r = won(lastX, lastY, lastPlayer);
         //System.out.println(r);
         switch (r) {
 			case 0: return Winner.NOT_FINISHED;
@@ -48,7 +48,7 @@ public class Minimax implements IGameLogic {
 		}
 	}
 
-	private int Won(int x, int y, int p) {
+	private int won(int x, int y, int p) {
 		int c, ix, iy;
 
 		//Horizontal
@@ -75,16 +75,15 @@ public class Minimax implements IGameLogic {
 		for(int i = 1; i <= 3 && x - i >= 0 && y + i < row; i++) if(state[x - i][y + i] == p) c++; else break;
 		if (c >= 4) return p;
 
-
-        for(int i = 0; i < col; i++) {
-            if(state[i][row-1] == 0) return 0;
-        }
+        // Checking for full board
+        for(int i = 0; i < col; i++)
+            if(state[i][row - 1] == 0) return 0;
 
 		return 3;
 	}
 	
 	public double utility() {
-		int result = Won(lastX, lastY, lastPlayer);
+		int result = won(lastX, lastY, lastPlayer);
 
 		if(result == 3) return 0;
 		else if(result == playerID) return 1;
@@ -93,9 +92,8 @@ public class Minimax implements IGameLogic {
 	
 	public void setState(Minimax that) {
         for (int i = 0; i < that.state.length; i++)
-            for (int j = 0; j < that.state[0].length; j++)
-		        this.state[i][j] = that.state[i][j];
-        //this.state = that.state.clone();
+            this.state[i] = that.state[i].clone();
+            this.usedFields = that.usedFields;
 	}
 
 	public void insertCoin(int column, int playerID) {
@@ -125,6 +123,7 @@ public class Minimax implements IGameLogic {
 		//TODO Write your implementation for this method
 		//return Heuristics.randomDecision(this);
 		//return Heuristics.firstDecision(this);
-		return Heuristics.miniMaxDecision(this, 1000000000);
+		//return Heuristics.miniMaxDecision(this, 1000000000);
+        return Heuristics.alphaBeta(this, 1000000);
 	}
 }
