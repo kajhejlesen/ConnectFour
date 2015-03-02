@@ -37,7 +37,9 @@ public class Minimax implements IGameLogic {
 	}
 	
 	public Winner gameFinished() {
-		switch (Won(lastX, lastY, lastPlayer)) {
+        int r = Won(lastX, lastY, lastPlayer);
+        //System.out.println(r);
+        switch (r) {
 			case 0: return Winner.NOT_FINISHED;
 			case 1: return Winner.PLAYER1;
 			case 2: return Winner.PLAYER2;
@@ -73,9 +75,12 @@ public class Minimax implements IGameLogic {
 		for(int i = 1; i <= 3 && x - i >= 0 && y + i < row; i++) if(state[x - i][y + i] == p) c++; else break;
 		if (c >= 4) return p;
 
-		if (usedFields == totalFields) return 3;
 
-		return 0;
+        for(int i = 0; i < col; i++) {
+            if(state[i][row-1] == 0) return 0;
+        }
+
+		return 3;
 	}
 	
 	public double utility() {
@@ -86,10 +91,11 @@ public class Minimax implements IGameLogic {
 		else return -1;
 	}
 	
-	public void setState(int[][] state) {
-        for (int i = 0; i < state.length; i++)
-            for (int j = 0; j < state[0].length; j++)
-		        this.state[i][j] = state[i][j];
+	public void setState(Minimax that) {
+        for (int i = 0; i < that.state.length; i++)
+            for (int j = 0; j < that.state[0].length; j++)
+		        this.state[i][j] = that.state[i][j];
+        //this.state = that.state.clone();
 	}
 
 	public void insertCoin(int column, int playerID) {
@@ -110,7 +116,7 @@ public class Minimax implements IGameLogic {
 	public Minimax result(int move, int playerID) {
 		Minimax newState = new Minimax();
 		newState.initializeGame(this.col, this.row, this.playerID);
-		newState.setState(this.state);
+		newState.setState(this);
 		newState.insertCoin(move, playerID);
 		return newState;
 	}

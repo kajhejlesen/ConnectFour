@@ -38,7 +38,6 @@ public class Heuristics {
 					maxMove = i;
 				}
 			}
-
         }
         System.out.println();
 		return maxMove;
@@ -49,6 +48,7 @@ public class Heuristics {
 			return state.utility();
 
 		boolean[] legalMoves = state.getLegalMoves();
+
 		double v = Double.NEGATIVE_INFINITY;
 		
 		for (int i = 0; i < legalMoves.length; i++) {
@@ -66,6 +66,7 @@ public class Heuristics {
 			return state.utility();
 		
 		boolean[] legalMoves = state.getLegalMoves();
+
 		double v = Double.POSITIVE_INFINITY;
 		int opponent = state.getPlayerID() == 1 ? 2 : 1;
 		
