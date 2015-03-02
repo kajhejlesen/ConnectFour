@@ -45,7 +45,7 @@ public class Heuristics {
 	}
 	
 	private static double maxValue(Minimax state, int depth) {
-		if (depth == 0 || !state.gameFinished().equals(IGameLogic.Winner.NOT_FINISHED))
+		if (!state.gameFinished().equals(IGameLogic.Winner.NOT_FINISHED))
 			return state.utility();
 
 		boolean[] legalMoves = state.getLegalMoves();
@@ -62,7 +62,7 @@ public class Heuristics {
 	}
 	
 	private static double minValue(Minimax state, int depth) {
-		if (depth == 0 || !state.gameFinished().equals(IGameLogic.Winner.NOT_FINISHED))
+		if (!state.gameFinished().equals(IGameLogic.Winner.NOT_FINISHED))
 			return state.utility();
 		
 		boolean[] legalMoves = state.getLegalMoves();
