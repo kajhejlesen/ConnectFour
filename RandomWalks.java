@@ -90,7 +90,7 @@ public class RandomWalks implements IGameLogic {
         int result = won(lastX, lastY, lastPlayer);
         if (result == 3) return 0;
         else if (result == playerID) return 2 + depth;
-        else return -2 - depth;
+        else return - (2 + depth);
     }
 
     public double utility(int depth) {
@@ -231,7 +231,7 @@ public class RandomWalks implements IGameLogic {
             currentPlayer = currentPlayer == 1 ? 2 : 1;
             state.insertCoin(randomDecision(state), currentPlayer);
         }
-        return state.eval(0);
+        return state.eval(-1);
     }
 
 }
