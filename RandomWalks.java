@@ -1,7 +1,8 @@
 import java.util.Random;
+import java.util.concurrent.*;
 
-public class RandomWalks implements IGameLogic {
-    private final static int MAX_DEPTH = 8;
+public class RandomWalks implements IGameBoard {
+    private final static ExecutorService threadPool =  Executors.newFixedThreadPool(32);
 
     private int col = 0;
     private int row = 0;
@@ -86,17 +87,16 @@ public class RandomWalks implements IGameLogic {
     }
 
     // depth == -1 on the random walks, as weight to solutions found early
-    public int eval(int depth) {
+    public int eval() {
         int result = won(lastX, lastY, lastPlayer);
         if (result == 3) return 0;
-        else if (result == playerID) return 2 + depth;
-        else return - (2 + depth);
+        else if (result == playerID) return 1;
+        else return - 1;
     }
 
     public double utility(int depth) {
-        if (depth > 0) return eval(depth);
-        return randomWalks(20 + usedFields*4, this);
-
+        if (depth > 0) return eval();
+        return randomWalks(10 + usedFields*4, this);
     }
 
     public void setState(RandomWalks that) {
@@ -129,76 +129,34 @@ public class RandomWalks implements IGameLogic {
     }
 
     public int decideNextMove() {
-        //TODO Write your implementation for this method
-        return alphaBeta(this, MAX_DEPTH);
-    }
+        //return AlphaBeta.alphaBeta(this, MAX_DEPTH);
+        final RandomWalks board = this;
 
-
-
-    public static int alphaBeta(RandomWalks state, int depth) {
-        boolean[] legalMoves = state.getLegalMoves();
-        double alpha = Double.NEGATIVE_INFINITY;
-        double beta = Double.POSITIVE_INFINITY;
-        double value = Double.NEGATIVE_INFINITY;
-        int maxMove = -1;
-
-        for (int i = 0; i < legalMoves.length; i++) {
-            if (legalMoves[i]) {
-                double moveValue = minValueAB(state.result(i, state.getPlayerID()), depth - 1, alpha, beta);
-                System.out.print(moveValue + " ");
-                if (moveValue > value) {
-                    value = moveValue;
-                    maxMove = i;
+        Future<Integer> result = threadPool.submit(new Callable<Integer>() {
+            int depth = 1;
+            long startTime = System.currentTimeMillis();
+            int val = 0;
+            @Override
+            public Integer call() throws Exception {
+                while (true) {
+                    val = AlphaBeta.alphaBeta(board, depth++);
+                    System.out.println("Time: " + (System.currentTimeMillis() - startTime) + " Depth" + depth);
+                    if ((System.currentTimeMillis() - startTime) > 1000) return val;
                 }
-                if (alpha <= value) alpha = value;
             }
+        });
+
+        try {
+            return result.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
-        System.out.println();
-        return maxMove;
+        return 0;
     }
 
-    private static double maxValueAB(RandomWalks state, int depth, double alpha, double beta) {
-        if (!state.gameFinished().equals(Winner.NOT_FINISHED))
-            return state.utility(depth);
-        if (depth == 0) return state.utility(-1);
 
-        boolean[] legalMoves = state.getLegalMoves();
-
-        double value = Double.NEGATIVE_INFINITY;
-
-        for (int i = 0; i < legalMoves.length; i++) {
-            if (legalMoves[i]) {
-                double moveValue = minValueAB(state.result(i, state.getPlayerID()), depth-1, alpha, beta);
-
-                if (moveValue > value)
-                    value = moveValue;
-                if (value >= beta) return value;
-                if (alpha <= value) alpha = value;
-            }
-        }
-        return value;
-    }
-
-    private static double minValueAB(RandomWalks state, int depth, double alpha, double beta) {
-        if (!state.gameFinished().equals(Winner.NOT_FINISHED))
-            return state.utility(depth);
-        if (depth == 0) return state.utility(-1);
-
-        boolean[] legalMoves = state.getLegalMoves();
-        double value = Double.POSITIVE_INFINITY;
-        int opponent = state.getPlayerID() == 1 ? 2 : 1;
-
-        for (int i = 0; i < legalMoves.length; i++) {
-            if (legalMoves[i]) {
-                double moveValue = maxValueAB(state.result(i, opponent), depth-1, alpha, beta);
-                if (moveValue < value)
-                    value = moveValue;
-                if (value <= alpha) return value;
-                if (beta >= value) beta = value;
-            }
-        }
-        return value;
-    }
 
     public static int randomDecision(RandomWalks state) {
         if (!state.gameFinished().equals(IGameLogic.Winner.NOT_FINISHED))
@@ -207,6 +165,7 @@ public class RandomWalks implements IGameLogic {
         Random gen = new Random();
         boolean[] legalMoves = state.getLegalMoves();
         int[] allowedMoves = new int[legalMoves.length];
+
         int moves = 0;
         for (int i = 0; i < legalMoves.length; i++)
             if (legalMoves[i]) allowedMoves[moves++] = i;
@@ -214,16 +173,37 @@ public class RandomWalks implements IGameLogic {
         return allowedMoves[gen.nextInt(moves)];
     }
 
-    protected static double randomWalks(int count, RandomWalks state) {
+    protected static double randomWalks(int count, final RandomWalks state) {
         double aggregate = 0.0;
-        for (int i = 0; i < count; i++) {
-            RandomWalks newState = new RandomWalks();
-            newState.initializeGame(state.col, state.row, state.playerID);
-            newState.setState(state);
-            aggregate += (double) walk(newState);
+
+        Future<Double>[] tasks = new Future[count];
+
+
+        for(int i = 0; i < count; i++){
+            tasks[i] = threadPool.submit(new Callable<Double>() {
+                @Override
+                public Double call() throws Exception {
+                    RandomWalks newState = new RandomWalks();
+                    newState.initializeGame(state.col, state.row, state.playerID);
+                    newState.setState(state);
+                    return Double.valueOf(walk(newState));
+                }
+            });
+            }
+
+        try {
+            for (int i = 0; i < count; i++) {
+
+                    aggregate += tasks[i].get();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
         return aggregate / count;
     }
+
 
     protected static int walk(RandomWalks state) {
         int currentPlayer = state.getPlayerID();
@@ -231,7 +211,7 @@ public class RandomWalks implements IGameLogic {
             currentPlayer = currentPlayer == 1 ? 2 : 1;
             state.insertCoin(randomDecision(state), currentPlayer);
         }
-        return state.eval(-1);
+        return state.eval();
     }
 
 }
