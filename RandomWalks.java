@@ -96,8 +96,7 @@ public class RandomWalks implements IGameBoard {
 
     public double eval(int depth) {
         if (depth > 0) return utility();
-        return randomWalks(totalFields-usedFields/2,this); // + usedFields*4, this);
-        //return eval();
+        return randomWalks(totalFields-usedFields,this); // + usedFields*4, this);
     }
 
     public void setState(RandomWalks that) {
@@ -142,7 +141,7 @@ public class RandomWalks implements IGameBoard {
                 while (true) {
                     val = AlphaBeta.alphaBeta(board, depth++);
                     System.out.println("Time: " + (System.currentTimeMillis() - startTime) + " Depth" + depth);
-                    if ((System.currentTimeMillis() - startTime) > 10000 || depth > 42) return val;
+                    if ((System.currentTimeMillis() - startTime) > 8000 || depth > 42) return val;
                 }
             }
         });
