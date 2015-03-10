@@ -96,7 +96,7 @@ public class RandomWalks implements IGameBoard {
 
     public double utility(int depth) {
         if (depth > 0) return eval();
-        return randomWalks(10 + usedFields*4, this);
+        return randomWalks(totalFields-usedFields, this);
     }
 
     public void setState(RandomWalks that) {
