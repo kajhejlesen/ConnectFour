@@ -141,7 +141,7 @@ public class RandomWalks implements IGameBoard {
                 while (true) {
                     val = AlphaBeta.alphaBeta(board, depth++);
                     System.out.println("Time: " + (System.currentTimeMillis() - startTime) + " Depth" + depth);
-                    if ((System.currentTimeMillis() - startTime) > 1000) return val;
+                    if ((System.currentTimeMillis() - startTime) > 8000 || depth > 42) return val;
                 }
             }
         });
