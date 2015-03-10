@@ -140,8 +140,7 @@ public class RandomWalks implements IGameBoard {
             @Override
             public Integer call() throws Exception {
                 while (true) {
-                    result = AlphaBeta.alphaBeta(board, depth++);
-                    //System.out.println("Time: " + (System.currentTimeMillis() - startTime) + " Depth" + depth);
+                    result = AlphaBeta.search(board, depth++);
                     if ((System.currentTimeMillis() - startTime) > 10000 || depth > 42) return result;
                     val = result;
                 }

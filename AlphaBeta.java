@@ -2,7 +2,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 public class AlphaBeta{
-    public static int alphaBeta(IGameBoard board, int cutoff) {
+    public static int search(IGameBoard board, int cutoff) {
         boolean[] legalMoves = board.getLegalMoves();
         double alpha =  Double.NEGATIVE_INFINITY;
         double beta =   Double.POSITIVE_INFINITY;
