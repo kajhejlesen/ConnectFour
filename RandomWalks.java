@@ -87,16 +87,17 @@ public class RandomWalks implements IGameBoard {
     }
 
     // depth == -1 on the random walks, as weight to solutions found early
-    public int eval() {
+    public int utility() {
         int result = won(lastX, lastY, lastPlayer);
         if (result == 3) return 0;
         else if (result == playerID) return 1;
         else return - 1;
     }
 
-    public double utility(int depth) {
-        if (depth > 0) return eval();
-        return randomWalks(10 + usedFields*4, this);
+    public double eval(int depth) {
+        if (depth > 0) return utility();
+        return randomWalks(totalFields-usedFields/2,this); // + usedFields*4, this);
+        //return eval();
     }
 
     public void setState(RandomWalks that) {
@@ -133,7 +134,7 @@ public class RandomWalks implements IGameBoard {
         final RandomWalks board = this;
 
         Future<Integer> result = threadPool.submit(new Callable<Integer>() {
-            int depth = 1;
+            int depth = 8;
             long startTime = System.currentTimeMillis();
             int val = 0;
             @Override
@@ -141,7 +142,7 @@ public class RandomWalks implements IGameBoard {
                 while (true) {
                     val = AlphaBeta.alphaBeta(board, depth++);
                     System.out.println("Time: " + (System.currentTimeMillis() - startTime) + " Depth" + depth);
-                    if ((System.currentTimeMillis() - startTime) > 1000) return val;
+                    if ((System.currentTimeMillis() - startTime) > 10000 || depth > 42) return val;
                 }
             }
         });
@@ -211,7 +212,7 @@ public class RandomWalks implements IGameBoard {
             currentPlayer = currentPlayer == 1 ? 2 : 1;
             state.insertCoin(randomDecision(state), currentPlayer);
         }
-        return state.eval();
+        return state.utility();
     }
 
 }
