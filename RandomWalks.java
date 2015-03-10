@@ -133,7 +133,7 @@ public class RandomWalks implements IGameBoard {
         final RandomWalks board = this;
 
         Future<Integer> result = threadPool.submit(new Callable<Integer>() {
-            int depth = 8;
+            int depth = 1;
             long startTime = System.currentTimeMillis();
             int val = 0;
             @Override
