@@ -14,7 +14,7 @@ public class AlphaBeta{
 
             if (legalMoves[i]) {
                 double moveValue = minValueAB(board.result(i, board.getPlayerID()), cutoff - 1, alpha, beta);
-                System.out.print(moveValue + " ");
+                //System.out.print(moveValue + " ");
                 if (moveValue > value) {
                     value = moveValue;
                     maxMove = i;
@@ -22,7 +22,7 @@ public class AlphaBeta{
                 if (alpha <= value) alpha = value;
             }
         }
-        System.out.println();
+        //System.out.println();
         return maxMove;
     }
 
