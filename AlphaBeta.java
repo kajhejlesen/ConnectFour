@@ -28,8 +28,8 @@ public class AlphaBeta{
 
     private static double maxValueAB(IGameBoard board, int depth, double alpha, double beta) {
         if (!board.gameFinished().equals(IGameLogic.Winner.NOT_FINISHED))
-            return board.utility(depth);
-        if (depth == 0) return board.utility(-1);
+            return board.eval(depth);
+        if (depth == 0) return board.eval(-1);
 
         boolean[] legalMoves = board.getLegalMoves();
 
@@ -51,8 +51,8 @@ public class AlphaBeta{
 
     private static double minValueAB(IGameBoard board, int depth, double alpha, double beta){
         if (!board.gameFinished().equals(IGameLogic.Winner.NOT_FINISHED))
-            return board.utility(depth);
-        if (depth == 0) return board.utility(-1);
+            return board.eval(depth);
+        if (depth == 0) return board.eval(-1);
 
         boolean[] legalMoves = board.getLegalMoves();
         double value = Double.POSITIVE_INFINITY;
