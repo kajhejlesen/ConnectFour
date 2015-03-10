@@ -87,15 +87,15 @@ public class RandomWalks implements IGameBoard {
     }
 
     // depth == -1 on the random walks, as weight to solutions found early
-    public int utility() {
+    public int utility(int depth) {
         int result = won(lastX, lastY, lastPlayer);
         if (result == 3) return 0;
-        else if (result == playerID) return 1;
-        else return - 1;
+        else if (result == playerID) return 2 + depth;
+        else return - (2 + depth);
     }
 
     public double eval(int depth) {
-        if (depth > 0) return utility();
+        if (depth > 0) return utility(depth);
         return randomWalks(totalFields-usedFields,this); // + usedFields*4, this);
     }
 
@@ -214,7 +214,7 @@ public class RandomWalks implements IGameBoard {
             currentPlayer = currentPlayer == 1 ? 2 : 1;
             state.insertCoin(randomDecision(state), currentPlayer);
         }
-        return state.utility();
+        return state.utility(-1);
     }
 
 }
