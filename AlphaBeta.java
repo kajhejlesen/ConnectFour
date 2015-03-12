@@ -10,11 +10,11 @@ public class AlphaBeta{
         int maxMove = -1;
 
         for (int k = 0; k < legalMoves.length; k++) {
-            int i = legalMoves.length/2 + (k % 2 == 0 ? -1 : 1) * (k+1)/2;
+            // starting with middle column, making aplha-beta pruning more effective
+            int i = legalMoves.length/2 + (k % 2 == 0 ? 1 : -1) * (k+1)/2;
 
             if (legalMoves[i]) {
                 double moveValue = minValueAB(board.result(i, board.getPlayerID()), cutoff - 1, alpha, beta);
-                //System.out.print(moveValue + " ");
                 if (moveValue > value) {
                     value = moveValue;
                     maxMove = i;
@@ -22,7 +22,6 @@ public class AlphaBeta{
                 if (alpha <= value) alpha = value;
             }
         }
-        //System.out.println();
         return maxMove;
     }
 
@@ -36,7 +35,7 @@ public class AlphaBeta{
         double value = Double.NEGATIVE_INFINITY;
 
         for (int k = 0; k < legalMoves.length; k++) {
-            int i = legalMoves.length/2 + (k % 2 == 0 ? -1 : 1) * (k+1)/2;
+            int i = legalMoves.length/2 + (k % 2 == 0 ? 1 : -1) * (k+1)/2;
             if (legalMoves[i]) {
                 double moveValue = minValueAB(board.result(i, board.getPlayerID()), depth-1, alpha, beta);
 
@@ -59,7 +58,7 @@ public class AlphaBeta{
         int opponent = board.getPlayerID() == 1 ? 2 : 1;
 
         for (int k = 0; k < legalMoves.length; k++) {
-            int i = legalMoves.length/2 + (k % 2 == 0 ? -1 : 1) * (k+1)/2;
+            int i = legalMoves.length/2 + (k % 2 == 0 ? 1 : -1) * (k+1)/2;
             if (legalMoves[i]) {
                 double moveValue = maxValueAB(board.result(i, opponent), depth-1, alpha, beta);
                 if (moveValue < value)

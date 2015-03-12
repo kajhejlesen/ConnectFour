@@ -130,7 +130,6 @@ public class RandomWalks implements IGameBoard {
 
     private int val = 0;
     public int decideNextMove() {
-        //return AlphaBeta.alphaBeta(this, MAX_DEPTH);
         final RandomWalks board = this;
 
         Future<Integer> result = threadPool.submit(new Callable<Integer>() {
@@ -141,14 +140,15 @@ public class RandomWalks implements IGameBoard {
             public Integer call() throws Exception {
                 while (true) {
                     result = AlphaBeta.search(board, depth++);
-                    if ((System.currentTimeMillis() - startTime) > 10000 || depth > 42) return result;
+                    if ((System.currentTimeMillis() - startTime) > 10000 || depth > totalFields - usedFields
+                            || result >= 1 || result <= -1) return result;
                     val = result;
                 }
             }
         });
 
         try {
-            return result.get(10,TimeUnit.SECONDS);
+            return result.get(10,TimeUnit.SECONDS); // terminates after 10 seconds
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -177,6 +177,7 @@ public class RandomWalks implements IGameBoard {
     }
 
     protected static double randomWalks(int count, final RandomWalks state) {
+        if (count == 0) return 0.0;
         double aggregate = 0.0;
 
         Future<Double>[] tasks = new Future[count];
