@@ -1,7 +1,7 @@
 import java.util.Random;
 import java.util.concurrent.*;
 
-public class RandomWalks implements IGameBoard {
+public class NoWalks implements IGameBoard {
     private final static ExecutorService threadPool =  Executors.newFixedThreadPool(32);
 
     private int col = 0;
@@ -9,24 +9,22 @@ public class RandomWalks implements IGameBoard {
     private int[][] state;
     private int playerID;
 
-    private int usedFields; // tiles occupied by tiles
-    private int totalFields; // total fields of board
+    private int usedFields = 0;
+    private int totalFields;
 
-    private int lastX, lastY; // last placement of tile
-    private int lastPlayer; // last player to place tile
+    private int lastX;
+    private int lastY;
+    private int lastPlayer;
 
-    /**
-     * Setting up game
-     * @param x column number of board
-     * @param y row number of board
-     * @param playerID 1 = blue (player1), 2 = red (player2)
-     */
+    public NoWalks() {
+        //TODO Write your implementation for this method
+    }
+
     public void initializeGame(int x, int y, int playerID) {
         this.col = x;
         this.row = y;
         this.playerID = playerID;
         state = new int[col][row];
-        usedFields = 0;
         totalFields = col * row;
     }
 
@@ -34,10 +32,6 @@ public class RandomWalks implements IGameBoard {
         return this.playerID;
     }
 
-    /**
-     *
-     * @return
-     */
     public boolean[] getLegalMoves() {
         boolean[] isLegal = new boolean[col];
         for (int i = 0; i < col; i++) {
@@ -46,10 +40,6 @@ public class RandomWalks implements IGameBoard {
         return isLegal;
     }
 
-    /**
-     * Checks for a winner of current state
-     * @return Winner
-     */
     public Winner gameFinished() {
         int r = won(lastX, lastY, lastPlayer);
         //System.out.println(r);
@@ -97,12 +87,6 @@ public class RandomWalks implements IGameBoard {
     }
 
     // depth == -1 on the random walks, as weight to solutions found early
-
-    /**
-     * Utility function of heuristic
-     * @param depth inverse depth, -1 if no winner has been found yet
-     * @return utility
-     */
     public int utility(int depth) {
         int result = won(lastX, lastY, lastPlayer);
         if (result == 3) return 0;
@@ -110,27 +94,17 @@ public class RandomWalks implements IGameBoard {
         else return - (2 + depth);
     }
 
-    /**
-     * eval function of heuristic
-     * @param depth inverse depth
-     * @return evaluation of state
-     */
     public double eval(int depth) {
         if (depth >= 0) return utility(depth);
-        return randomWalks(totalFields-usedFields,this);
+        return randomWalks(0 ,this); // + usedFields*4, this);
     }
 
-    private void setState(RandomWalks that) {
+    public void setState(NoWalks that) {
         for (int i = 0; i < that.state.length; i++)
             this.state[i] = that.state[i].clone();
         this.usedFields = that.usedFields;
     }
 
-    /**
-     * Updates state with a move
-     * @param column The column where the coin is inserted.
-     * @param playerID The ID of the current player.
-     */
     public void insertCoin(int column, int playerID) {
         if (state[column][row-1] == 0) {
             for (int i = 0; i < row; i++) {
@@ -143,40 +117,31 @@ public class RandomWalks implements IGameBoard {
                 }
             }
         }
+        //TODO Write your implementation for this method	
     }
 
-    /**
-     * Generates a new state based on a move
-     * @param move column to place tile
-     * @param playerID playerID to place tile
-     * @return RandomWalks state
-     */
-    public RandomWalks result(int move, int playerID) {
-        RandomWalks newState = new RandomWalks();
+    public NoWalks result(int move, int playerID) {
+        NoWalks newState = new NoWalks();
         newState.initializeGame(this.col, this.row, this.playerID);
         newState.setState(this);
         newState.insertCoin(move, playerID);
         return newState;
     }
 
-    private int val = 0;    // required for access by anonymous class
-
-    /**
-     * Calculates the best move for the player
-     * @return a move
-     */
+    private int val = 0;
     public int decideNextMove() {
-        final RandomWalks board = this;
+        final NoWalks board = this;
+
         Future<Integer> result = threadPool.submit(new Callable<Integer>() {
             int depth = 1;
             long startTime = System.currentTimeMillis();
             int result = 0;
             @Override
             public Integer call() throws Exception {
-                // Iterative Depth Search
                 while (true) {
                     result = AlphaBeta.search(board, depth++);
                     if ((System.currentTimeMillis() - startTime) > 10000 || depth > totalFields - usedFields) return result;
+                    System.out.println("depth: " + depth);
                     val = result;
                 }
             }
@@ -194,7 +159,9 @@ public class RandomWalks implements IGameBoard {
         return 0;
     }
 
-    private static int randomDecision(RandomWalks state) {
+
+
+    public static int randomDecision(NoWalks state) {
         if (!state.gameFinished().equals(IGameLogic.Winner.NOT_FINISHED))
             return -1;
 
@@ -209,29 +176,29 @@ public class RandomWalks implements IGameBoard {
         return allowedMoves[gen.nextInt(moves)];
     }
 
-    private static double randomWalks(int count, final RandomWalks state) {
+    protected static double randomWalks(int count, final NoWalks state) {
         if (count == 0) return 0.0;
         double aggregate = 0.0;
 
         Future<Double>[] tasks = new Future[count];
 
-        // handles thread for each random walk
+
         for(int i = 0; i < count; i++){
             tasks[i] = threadPool.submit(new Callable<Double>() {
                 @Override
                 public Double call() throws Exception {
-                    RandomWalks newState = new RandomWalks();
+                    NoWalks newState = new NoWalks();
                     newState.initializeGame(state.col, state.row, state.playerID);
                     newState.setState(state);
                     return Double.valueOf(walk(newState));
                 }
             });
-            }
+        }
 
         try {
             for (int i = 0; i < count; i++) {
 
-                    aggregate += tasks[i].get();
+                aggregate += tasks[i].get();
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -242,7 +209,7 @@ public class RandomWalks implements IGameBoard {
     }
 
 
-    private static int walk(RandomWalks state) {
+    protected static int walk(NoWalks state) {
         int currentPlayer = state.getPlayerID();
         while (state.gameFinished().equals(Winner.NOT_FINISHED)) {
             currentPlayer = currentPlayer == 1 ? 2 : 1;

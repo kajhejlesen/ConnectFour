@@ -2,6 +2,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 public class AlphaBeta{
+    /**
+     * Conducts an alpha-beta pruned minimax heuristic on a game state
+     * @param board game state
+     * @param cutoff cutoff (max-depth) value
+     * @return a move
+     */
     public static int search(IGameBoard board, int cutoff) {
         boolean[] legalMoves = board.getLegalMoves();
         double alpha =  Double.NEGATIVE_INFINITY;
