@@ -16,7 +16,7 @@ public class AlphaBeta{
         int maxMove = -1;
 
         for (int k = 0; k < legalMoves.length; k++) {
-            // starting with middle column, making aplha-beta pruning more effective
+            // starting with middle column, making alpha-beta pruning more effective
             int i = legalMoves.length/2 + (k % 2 == 0 ? 1 : -1) * (k+1)/2;
 
             if (legalMoves[i]) {

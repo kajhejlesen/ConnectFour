@@ -96,8 +96,6 @@ public class RandomWalks implements IGameBoard {
         return 3;
     }
 
-    // depth == -1 on the random walks, as weight to solutions found early
-
     /**
      * Utility function of heuristic
      * @param depth inverse depth, -1 if no winner has been found yet
